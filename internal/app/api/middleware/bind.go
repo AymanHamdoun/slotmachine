@@ -1,73 +1,121 @@
 package middleware
 
 import (
+	"bytes"
+	"context"
 	"encoding/json"
+	"fmt"
+	"github.com/gin-gonic/gin/binding"
+	"io"
 	"net/http"
-	"net/url"
-	"reflect"
 )
 
-// BindInput is a middleware that binds request data to a struct
-func BindInput(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Store the original body for the next handlers
-		r.ParseForm()
-		ctx := r.Context()
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
+const contentTypeHeader = "Content-Type"
+
+// Content types.
+const (
+	JSONContentType     = "application/json"
+	FormBodyContentType = "application/x-www-form-urlencoded"
+)
+
+type bodyCtxKey struct{}
+
+// Content-Type header can include tags like charset and lang which need to be filtered out while binding.
+func filterFlags(content string) string {
+	for i, char := range content {
+		if char == ' ' || char == ';' {
+			return content[:i]
+		}
+	}
+	return content
 }
 
-// BindInputData binds request data to the provided struct based on the request method and content type
-func BindInputData(r *http.Request, inputStruct interface{}) error {
-	if r.Method == http.MethodPost && r.Header.Get("Content-Type") == "application/json" {
-		// Marshal the request JSON body to the input struct
-		err := json.NewDecoder(r.Body).Decode(inputStruct)
-		if err != nil {
-			if err.Error() == "EOF" {
-				return nil
+func BindingMiddleware[Req any]() func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			toBind := new(Req)
+
+			err := bindDataBasedOnContentType(r, toBind)
+			if err != nil {
+				//bodyBytes, _ := io.ReadAll(r.Body)
+				//logger.Ctx(r.Context()).Warn("binding middleware: failed to bind data",
+				//	logger.Error(err),
+				//	logger.String("path", path),
+				//	logger.String("url", r.URL.String()),
+				//	logger.String("method", r.Method),
+				//	logger.String("payload", string(bodyBytes)),
+				//	logger.Any("headers", r.Header),
+				//)
+
+				http.Error(w, "bad request", http.StatusBadRequest)
+				return
 			}
-			return err
-		}
-	} else if r.Method == http.MethodPost {
-		// Bind form data
-		err := bindForm(r.PostForm, inputStruct)
-		if err != nil {
-			return err
-		}
-	} else {
-		// Bind query parameters
-		err := bindForm(r.URL.Query(), inputStruct)
-		if err != nil {
-			return err
-		}
+
+			ctx := context.WithValue(r.Context(), bodyCtxKey{}, toBind)
+			next.ServeHTTP(w, r.WithContext(ctx))
+		})
+	}
+}
+
+func bindDataBasedOnContentType[Req any](r *http.Request, toBind *Req) error {
+	contentType := filterFlags(r.Header.Get(contentTypeHeader))
+
+	// We have requests that are setting the content-type to json or binary even when the parameters are meant to be read from the query string.
+	if r.Method == http.MethodGet {
+		contentType = FormBodyContentType
+	}
+
+	switch contentType {
+	case FormBodyContentType:
+		return bindDataFromFormRequest(r, toBind)
+	case JSONContentType:
+		return bindDataFromJSONRequest(r, toBind)
+	default:
+		return bindDataFromFormRequest(r, toBind)
+	}
+}
+
+func bindDataFromFormRequest[Req any](r *http.Request, toBind *Req) error {
+	contentType := filterFlags(r.Header.Get(contentTypeHeader))
+	// Copy the body
+	bodyCopy, _ := io.ReadAll(r.Body)
+
+	// Refill so we can properly parse it
+	r.Body = io.NopCloser(bytes.NewReader(bodyCopy))
+
+	// Consume the body
+	if err := r.ParseForm(); err != nil {
+		return err
+	}
+
+	err := binding.Default(r.Method, contentType).Bind(r, toBind)
+
+	// Refill the body case someone needs down the chain
+	r.Body = io.NopCloser(bytes.NewReader(bodyCopy))
+
+	if err != nil {
+		return fmt.Errorf("failed to decode form request: %w", err)
 	}
 	return nil
 }
 
-// bindForm binds url.Values to a struct using reflection
-func bindForm(values url.Values, dst interface{}) error {
-	val := reflect.ValueOf(dst)
-	if val.Kind() != reflect.Ptr {
+func bindDataFromJSONRequest[Req any](r *http.Request, toBind *Req) error {
+	bodyBytes, err := io.ReadAll(r.Body)
+
+	// Refill it in case someone needs down the chain
+	r.Body = io.NopCloser(bytes.NewReader(bodyBytes))
+	if err != nil {
+		return fmt.Errorf("could not read request body: %w", err)
+	}
+
+	if len(bodyBytes) == 0 {
 		return nil
 	}
-	val = val.Elem()
-	typ := val.Type()
 
-	for i := 0; i < val.NumField(); i++ {
-		field := val.Field(i)
-		typeField := typ.Field(i)
-		formKey := typeField.Tag.Get("form")
-		if formKey == "" {
-			formKey = typeField.Name
-		}
+	err = json.Unmarshal(bodyBytes, &toBind)
 
-		if values.Get(formKey) != "" && field.CanSet() {
-			switch field.Kind() {
-			case reflect.String:
-				field.SetString(values.Get(formKey))
-				// Add more types as needed
-			}
-		}
+	if err != nil {
+		return fmt.Errorf("could not unmarshal request JSON: %w", err)
 	}
 	return nil
 }
