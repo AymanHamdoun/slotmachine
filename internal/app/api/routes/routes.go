@@ -11,6 +11,6 @@ func SetupRoutes(r *chi.Mux) {
 		context.Background(),
 		r,
 		handlers.GetCreateUserRoutes(),
-		&handlers.CreateUserHandler{},
+		handlers.CreateUserHandler{},
 	)
 }

@@ -10,6 +10,8 @@ import (
 	"net/http"
 )
 
+type BindingRequestCtxKey struct{}
+
 const contentTypeHeader = "Content-Type"
 
 // Content types.
@@ -17,8 +19,6 @@ const (
 	JSONContentType     = "application/json"
 	FormBodyContentType = "application/x-www-form-urlencoded"
 )
-
-type bodyCtxKey struct{}
 
 // Content-Type header can include tags like charset and lang which need to be filtered out while binding.
 func filterFlags(content string) string {
@@ -37,21 +37,11 @@ func BindingMiddleware[Req any]() func(next http.Handler) http.Handler {
 
 			err := bindDataBasedOnContentType(r, toBind)
 			if err != nil {
-				//bodyBytes, _ := io.ReadAll(r.Body)
-				//logger.Ctx(r.Context()).Warn("binding middleware: failed to bind data",
-				//	logger.Error(err),
-				//	logger.String("path", path),
-				//	logger.String("url", r.URL.String()),
-				//	logger.String("method", r.Method),
-				//	logger.String("payload", string(bodyBytes)),
-				//	logger.Any("headers", r.Header),
-				//)
-
 				http.Error(w, "bad request", http.StatusBadRequest)
 				return
 			}
 
-			ctx := context.WithValue(r.Context(), bodyCtxKey{}, toBind)
+			ctx := context.WithValue(r.Context(), BindingRequestCtxKey{}, toBind)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}

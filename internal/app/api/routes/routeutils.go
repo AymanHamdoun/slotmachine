@@ -7,14 +7,12 @@ import (
 	"net/http"
 )
 
-type bodyCtxKey struct{}
-
 type handler[Req any] interface {
-	Serve(context.Context, *Req, http.ResponseWriter)
+	Serve(context.Context, Req, http.ResponseWriter)
 }
 
 func getRequest[Req any](ctx context.Context) *Req {
-	val := ctx.Value(bodyCtxKey{})
+	val := ctx.Value(middleware.BindingRequestCtxKey{})
 	request, ok := val.(*Req)
 	if ok {
 		return request
@@ -38,6 +36,6 @@ func registerPOST[Req any](
 func genericHandler[Req any](_ context.Context, _ string, handler handler[Req]) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		request := getRequest[Req](r.Context())
-		handler.Serve(r.Context(), request, w)
+		handler.Serve(r.Context(), *request, w)
 	}
 }

@@ -19,6 +19,6 @@ type CreateUserInput struct {
 
 type CreateUserHandler struct{}
 
-func (h *CreateUserHandler) Serve(_ context.Context, input *CreateUserInput, w http.ResponseWriter) {
-
+func (h CreateUserHandler) Serve(_ context.Context, input CreateUserInput, w http.ResponseWriter) {
+	w.Write([]byte("ok"))
 }
