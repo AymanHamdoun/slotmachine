@@ -1,3 +1,4 @@
+```
 project-name/
 ├── cmd/
 │   ├── api/
@@ -75,4 +76,4 @@ project-name/
 ├── go.mod
 ├── go.sum
 ├── .env                     // Environment variables
-└── Makefile                 // Build/test commands
+```
