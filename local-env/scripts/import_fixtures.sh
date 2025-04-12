@@ -3,7 +3,7 @@
 DB_NAME="default"
 DB_USER="root"
 DB_PASS="dbuserpassword"
-DB_HOST="localhost"
+DB_HOST="127.0.0.1"
 DB_PORT=4306
 
 FIXTURE_DIR="$(dirname "$0")/../../internal/app/database/fixtures"
