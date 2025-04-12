@@ -1,0 +1,9 @@
+version: "2"
+sql:
+- engine: "mysql"
+  queries: "internal/app/database/queries/users.sql"
+  schema: "internal/app/database/schemas/users.sql"
+  gen:
+    go:
+      package: "dbmodels"
+      out: "internal/app/database/dbmodels"

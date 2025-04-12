@@ -1,5 +1,6 @@
 .vscode
 .idea
+
 .env
 
 local-env/mysql_data
