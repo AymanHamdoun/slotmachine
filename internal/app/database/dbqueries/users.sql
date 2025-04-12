@@ -6,11 +6,11 @@ WHERE id = ? LIMIT 1;
 SELECT * FROM users 
 ORDER BY first_name;
 
--- name: CreateUserWithEmail :execresult
+-- name: CreateUserWithEmailAndPassword :execresult
 INSERT INTO users (
-  first_name, last_name, email, registration_method_id
+  first_name, last_name, email, password, registration_method_id
 ) VALUES (
-  ?, ?, ?, ?
+  ?, ?, ?, ?, ?
 );
 
 -- name: DeleteUser :exec

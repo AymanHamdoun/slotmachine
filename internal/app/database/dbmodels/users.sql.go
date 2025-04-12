@@ -10,26 +10,28 @@ import (
 	"database/sql"
 )
 
-const createUserWithEmail = `-- name: CreateUserWithEmail :execresult
+const createUserWithEmailAndPassword = `-- name: CreateUserWithEmailAndPassword :execresult
 INSERT INTO users (
-  first_name, last_name, email, registration_method_id
+  first_name, last_name, email, password, registration_method_id
 ) VALUES (
-  ?, ?, ?, ?
+  ?, ?, ?, ?, ?
 )
 `
 
-type CreateUserWithEmailParams struct {
+type CreateUserWithEmailAndPasswordParams struct {
 	FirstName            string
 	LastName             string
 	Email                sql.NullString
+	Password             sql.NullString
 	RegistrationMethodID int32
 }
 
-func (q *Queries) CreateUserWithEmail(ctx context.Context, arg CreateUserWithEmailParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, createUserWithEmail,
+func (q *Queries) CreateUserWithEmailAndPassword(ctx context.Context, arg CreateUserWithEmailAndPasswordParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, createUserWithEmailAndPassword,
 		arg.FirstName,
 		arg.LastName,
 		arg.Email,
+		arg.Password,
 		arg.RegistrationMethodID,
 	)
 }

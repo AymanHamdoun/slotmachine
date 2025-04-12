@@ -39,10 +39,11 @@ func (h CreateUserHandler) Serve(ctx context.Context, input CreateUserInput, w h
 
 	queries := dbmodels.New(db)
 
-	queries.CreateUserWithEmail(ctx, dbmodels.CreateUserWithEmailParams{
+	queries.CreateUserWithEmailAndPassword(ctx, dbmodels.CreateUserWithEmailAndPasswordParams{
 		FirstName:            input.FirstName,
 		LastName:             input.LastName,
-		Email:                sql.NullString{String: input.Email},
+		Email:                sql.NullString{String: input.Email, Valid: true},
+		Password:             sql.NullString{String: input.Password, Valid: true},
 		RegistrationMethodID: 1,
 	})
 

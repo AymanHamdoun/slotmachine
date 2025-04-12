@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"fmt"
 	"go-backend/internal/app/config"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 func GetDB(ctx context.Context) (*sql.DB, error) {
