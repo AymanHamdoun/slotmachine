@@ -5,9 +5,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/gin/binding"
 	"io"
 	"net/http"
+
+	"github.com/gin-gonic/gin/binding"
 )
 
 type BindingRequestCtxKey struct{}

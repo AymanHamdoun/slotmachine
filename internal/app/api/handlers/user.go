@@ -17,8 +17,14 @@ type CreateUserInput struct {
 	Password string `json:"password" form:"password"`
 }
 
+type CreateUserResponse struct {
+	Status string `json:"status"`
+}
+
 type CreateUserHandler struct{}
 
-func (h CreateUserHandler) Serve(_ context.Context, input CreateUserInput, w http.ResponseWriter) {
-	w.Write([]byte("ok"))
+func (h CreateUserHandler) Serve(ctx context.Context, input CreateUserInput, w http.ResponseWriter) {
+	_json(ctx, w, CreateUserResponse{
+		Status: "ok",
+	})
 }
