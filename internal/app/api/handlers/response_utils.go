@@ -6,6 +6,11 @@ import (
 	"net/http"
 )
 
+type errorResponse struct {
+	Status  string `json:"status"`
+	Message string `json:"message"`
+}
+
 func _json(ctx context.Context, w http.ResponseWriter, structToWrite any) {
 	w.Header().Set("Content-Type", "application/json")
 
