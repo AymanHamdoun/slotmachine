@@ -1,4 +1,4 @@
-package handlers
+package apihandlers
 
 import (
 	"context"
@@ -27,7 +27,7 @@ type CreateUserResponse struct {
 
 type CreateUserHandler struct{}
 
-func (h CreateUserHandler) Serve(ctx context.Context, input CreateUserInput, w http.ResponseWriter) {
+func (h CreateUserHandler) Serve(ctx context.Context, input CreateUserInput, w http.ResponseWriter, r *http.Request) {
 	db, err := database.GetDB(ctx)
 	if err != nil {
 		_json(ctx, w, errorResponse{

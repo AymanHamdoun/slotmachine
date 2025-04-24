@@ -1,21 +1,12 @@
-package apihandlers
+package viewhandlers
 
 import (
 	"context"
-	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
-type errorResponse struct {
-	Status  string `json:"status"`
-	Message string `json:"message"`
-}
-
-func _json(ctx context.Context, w http.ResponseWriter, structToWrite any) {
-	w.Header().Set("Content-Type", "application/json")
-
-	err := json.NewEncoder(w).Encode(structToWrite)
-	if err != nil {
-		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
-	}
+func _view(ctx context.Context, w http.ResponseWriter, r *http.Request, viewPath string, viewData any) {
+	w.Header().Set("Content-Type", "text/html")
+	http.ServeFile(w, r, fmt.Sprintf("web/dist/%s", viewPath))
 }

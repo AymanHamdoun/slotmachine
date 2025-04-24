@@ -8,7 +8,7 @@ import (
 )
 
 type handler[Req any] interface {
-	Serve(context.Context, Req, http.ResponseWriter)
+	Serve(context.Context, Req, http.ResponseWriter, *http.Request)
 }
 
 func getRequest[Req any](ctx context.Context) *Req {
@@ -18,6 +18,19 @@ func getRequest[Req any](ctx context.Context) *Req {
 		return request
 	}
 	return nil
+}
+
+func registerGET[Req any](
+	ctx context.Context,
+	router *chi.Mux,
+	paths []string,
+	handler handler[Req]) {
+	for _, path := range paths {
+		middlewares := []func(next http.Handler) http.Handler{
+			middleware.BindingMiddleware[Req](),
+		}
+		router.With(middlewares...).Get(path, genericHandler(ctx, path, handler))
+	}
 }
 
 func registerPOST[Req any](
@@ -36,6 +49,6 @@ func registerPOST[Req any](
 func genericHandler[Req any](_ context.Context, _ string, handler handler[Req]) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		request := getRequest[Req](r.Context())
-		handler.Serve(r.Context(), *request, w)
+		handler.Serve(r.Context(), *request, w, r)
 	}
 }
