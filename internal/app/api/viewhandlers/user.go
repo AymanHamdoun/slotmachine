@@ -2,6 +2,7 @@ package viewhandlers
 
 import (
 	"context"
+	"go-backend/views"
 	"net/http"
 )
 
@@ -19,5 +20,7 @@ type createUserViewData struct {
 }
 
 func (h CreateUserHandler) Serve(ctx context.Context, input CreateUserInput, w http.ResponseWriter, r *http.Request) {
-	_view(ctx, w, r, "index.html", createUserViewData{})
+	_templ(w, r, views.DefaultLayout(
+		views.HeroSection("Hello World"),
+	))
 }
