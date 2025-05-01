@@ -1,0 +1,17 @@
+services:
+# MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: go-mysql
+    restart: unless-stopped
+    tty: true
+    ports:
+    - "4306:3306"
+    volumes:
+    - ./mysql_data/:/var/lib/mysql/
+
+    environment:
+    - MYSQL_DATABASE=default
+    - MYSQL_USER=dbuser
+    - MYSQL_PASSWORD=dbuserpassword
+    - MYSQL_ROOT_PASSWORD=dbuserpassword
