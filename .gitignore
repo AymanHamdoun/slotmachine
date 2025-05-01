@@ -3,5 +3,5 @@
 
 .env
 
-./local-env/mysql_data
-./web/node_modules
+/local-env/mysql_data
+/web/node_modules
