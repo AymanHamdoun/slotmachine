@@ -31,6 +31,13 @@ func SetupRoutes(r *chi.Mux) {
 		apihandlers.RollHandler{},
 	)
 
+	registerPOST[apihandlers.CashOutInput](
+		context.Background(),
+		r,
+		apihandlers.GetCashOutRoutes(),
+		apihandlers.CashOutHandler{},
+	)
+
 	registerGET[apihandlers.GetSessionInput](
 		context.Background(),
 		r,
