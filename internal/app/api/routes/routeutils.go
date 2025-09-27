@@ -46,6 +46,19 @@ func registerPOST[Req any](
 	}
 }
 
+func registerDELETE[Req any](
+	ctx context.Context,
+	router *chi.Mux,
+	paths []string,
+	handler handler[Req]) {
+	for _, path := range paths {
+		middlewares := []func(next http.Handler) http.Handler{
+			middleware.BindingMiddleware[Req](),
+		}
+		router.With(middlewares...).Delete(path, genericHandler(ctx, path, handler))
+	}
+}
+
 func genericHandler[Req any](_ context.Context, _ string, handler handler[Req]) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		request := getRequest[Req](r.Context())

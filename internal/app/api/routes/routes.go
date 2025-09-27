@@ -3,6 +3,7 @@ package routes
 import (
 	"context"
 	"go-backend/internal/app/api/apihandlers"
+	"go-backend/internal/app/api/viewhandlers"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -16,6 +17,10 @@ func SetupRoutes(r *chi.Mux) {
 	// Serves Manual assets like images
 	publicFS := http.FileServer(http.Dir("web/public"))
 	r.Handle("/public/*", http.StripPrefix("/public/", publicFS))
+
+	// Serves static files like custom JS, CSS, etc.
+	staticFS := http.FileServer(http.Dir("web/static"))
+	r.Handle("/static/*", http.StripPrefix("/static/", staticFS))
 
 	registerPOST[apihandlers.CreateSessionInput](
 		context.Background(),
@@ -43,5 +48,12 @@ func SetupRoutes(r *chi.Mux) {
 		r,
 		apihandlers.GetGetSessionRoutes(),
 		apihandlers.GetSessionHandler{},
+	)
+
+	registerGET[viewhandlers.SlotMachineInput](
+		context.Background(),
+		r,
+		viewhandlers.GetSlotMachineRoutes(),
+		viewhandlers.SlotMachineHandler{},
 	)
 }
