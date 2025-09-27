@@ -1,4 +1,6 @@
-[Slot Machine API.postman_collection.json](https://github.com/user-attachments/files/22573378/Slot.Machine.API.postman_collection.json)# Go Slot Machine Backend
+# Go Slot Machine
+
+[Slot Machine API.postman_collection.json](https://github.com/user-attachments/files/22573378/Slot.Machine.API.postman_collection.json)
 <img width="714" height="684" alt="Screenshot 2025-09-27 at 2 55 06 PM" src="https://github.com/user-attachments/assets/2ae9e62d-3575-4431-b09a-7b706de4ac3e" />
 
 [Uploading Slot Machine A{
