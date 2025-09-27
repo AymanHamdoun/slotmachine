@@ -1,10 +1,9 @@
-// Slot Machine API Client
+// Slot Machine API Client (shared with main slot machine)
 class SlotMachineAPI {
     constructor(baseURL = '') {
         this.baseURL = baseURL;
     }
 
-    // Create a new game session
     async createSession(name = '') {
         try {
             const response = await fetch(`${this.baseURL}/api/v1/sessions`, {
@@ -12,7 +11,7 @@ class SlotMachineAPI {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                credentials: 'include', // Important for cookies
+                credentials: 'include',
                 body: JSON.stringify({ name: name })
             });
 
@@ -27,7 +26,6 @@ class SlotMachineAPI {
         }
     }
 
-    // Get current session
     async getSession() {
         try {
             const response = await fetch(`${this.baseURL}/api/v1/session`, {
@@ -46,26 +44,6 @@ class SlotMachineAPI {
         }
     }
 
-    // Delete session
-    async deleteSession() {
-        try {
-            const response = await fetch(`${this.baseURL}/api/v1/session`, {
-                method: 'DELETE',
-                credentials: 'include'
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            return await response.json();
-        } catch (error) {
-            console.error('Error deleting session:', error);
-            throw error;
-        }
-    }
-
-    // Roll the slot machine
     async roll() {
         try {
             const response = await fetch(`${this.baseURL}/api/v1/roll`, {
@@ -88,7 +66,6 @@ class SlotMachineAPI {
         }
     }
 
-    // Cash out
     async cashOut(accountNumber) {
         try {
             const response = await fetch(`${this.baseURL}/api/v1/cash-out`, {
@@ -112,14 +89,24 @@ class SlotMachineAPI {
     }
 }
 
-// Slot Machine UI Controller
-class SlotMachineGame {
+// Minimal Slot Machine Implementation
+class MinimalSlotMachine {
     constructor() {
         this.api = new SlotMachineAPI();
-        this.slots = [];
         this.credits = 0;
-        this.isRolling = false;
         this.sessionActive = false;
+        this.isRolling = false;
+        this.cashOutButtonTricks = {
+            dodgeChance: 0.5,
+            unclickableChance: 0.4
+        };
+
+        this.symbolMap = {
+            'cherry': 'C',
+            'lemon': 'L',
+            'orange': 'O',
+            'watermelon': 'W'
+        };
 
         this.initializeElements();
         this.attachEventListeners();
@@ -128,26 +115,27 @@ class SlotMachineGame {
 
     initializeElements() {
         this.slotElements = [
-            document.getElementById('slot-1'),
-            document.getElementById('slot-2'),
-            document.getElementById('slot-3')
+            document.getElementById('minimal-slot-1'),
+            document.getElementById('minimal-slot-2'),
+            document.getElementById('minimal-slot-3')
         ];
-        this.creditsDisplay = document.getElementById('credits');
-        this.createSessionBtn = document.getElementById('create-session-btn');
-        this.rollBtn = document.getElementById('roll-btn');
-        this.cashOutBtn = document.getElementById('cash-out-btn');
-        this.messageDisplay = document.getElementById('message');
+        this.creditsDisplay = document.getElementById('minimal-credits');
+        this.startBtn = document.getElementById('minimal-start-btn');
+        this.rollBtn = document.getElementById('minimal-roll-btn');
+        this.cashOutBtn = document.getElementById('minimal-cashout-btn');
+        this.messageDisplay = document.getElementById('minimal-message');
     }
 
     attachEventListeners() {
-        if (this.createSessionBtn) {
-            this.createSessionBtn.addEventListener('click', () => this.createSession());
+        if (this.startBtn) {
+            this.startBtn.addEventListener('click', () => this.startGame());
         }
         if (this.rollBtn) {
             this.rollBtn.addEventListener('click', () => this.roll());
         }
         if (this.cashOutBtn) {
-            this.cashOutBtn.addEventListener('click', () => this.cashOut());
+            this.cashOutBtn.addEventListener('mouseenter', () => this.handleCashOutHover());
+            this.cashOutBtn.addEventListener('click', (e) => this.handleCashOutClick(e));
         }
     }
 
@@ -165,7 +153,7 @@ class SlotMachineGame {
         }
     }
 
-    async createSession() {
+    async startGame() {
         try {
             const playerName = prompt('Enter your name (optional):') || '';
             const response = await this.api.createSession(playerName);
@@ -174,18 +162,18 @@ class SlotMachineGame {
                 this.sessionActive = true;
                 this.credits = response.session.credits;
                 this.updateUI();
-                this.showMessage(`Welcome ${playerName || 'Player'}! You have ${this.credits} credits.`, 'success');
+                this.showMessage(`Game started! You have ${this.credits} credits.`, 'success');
             } else {
-                this.showMessage('Failed to create session', 'error');
+                this.showMessage('Failed to start game', 'error');
             }
         } catch (error) {
-            this.showMessage('Error creating session', 'error');
+            this.showMessage('Error starting game', 'error');
         }
     }
 
     async roll() {
         if (!this.sessionActive) {
-            this.showMessage('Please create a game session first', 'warning');
+            this.showMessage('Please start a game first', 'error');
             return;
         }
 
@@ -201,30 +189,36 @@ class SlotMachineGame {
         this.isRolling = true;
         this.rollBtn.disabled = true;
 
-        // Animate slots
-        this.animateSlots();
+        // Start spinning all slots with 'X'
+        this.startSpinning();
+        this.showMessage('Rolling...', '');
 
         try {
             const response = await this.api.roll();
 
             if (response.status === 'ok') {
-                // Progressive reveal: 1s, 2s, 3s
-                await this.progressiveReveal(response.slotValues);
+                // Convert server response to letters
+                const slotLetters = response.slotValues.map(symbol => this.symbolMap[symbol] || '?');
 
+                // Progressive reveal: 1s, 2s, 3s
+                await this.progressiveReveal(slotLetters);
+
+                // Update credits
                 this.credits = response.credits;
                 this.updateUI();
 
                 // Check for win
-                if (response.slotValues[0] === response.slotValues[1] &&
-                    response.slotValues[1] === response.slotValues[2]) {
-                    this.showMessage(`🎉 WINNER! You won with ${response.slotValues[0]}!`, 'win');
+                if (slotLetters[0] === slotLetters[1] && slotLetters[1] === slotLetters[2]) {
+                    this.showMessage(`🎉 WINNER! ${slotLetters[0]}-${slotLetters[1]}-${slotLetters[2]}!`, 'win');
+                } else {
+                    this.showMessage('Better luck next time!', '');
                 }
             } else {
-                this.stopAnimation(['?', '?', '?']);
+                this.stopAllSpinning();
                 this.showMessage(response.message || 'Roll failed', 'error');
             }
         } catch (error) {
-            this.stopAnimation(['?', '?', '?']);
+            this.stopAllSpinning();
             this.showMessage('Error during roll', 'error');
         } finally {
             this.isRolling = false;
@@ -232,74 +226,107 @@ class SlotMachineGame {
         }
     }
 
-    animateSlots() {
-        const symbols = ['🍒', '🍋', '🍊', '🍉'];
-        const symbolMap = {
-            'cherry': '🍒',
-            'lemon': '🍋',
-            'orange': '🍊',
-            'watermelon': '🍉'
-        };
-
-        this.slotElements.forEach(slot => {
-            slot.classList.add('rolling');
-            const interval = setInterval(() => {
-                const randomSymbol = symbols[Math.floor(Math.random() * symbols.length)];
-                slot.textContent = randomSymbol;
-            }, 100);
-            slot.dataset.interval = interval;
-        });
-    }
-
-    stopAnimation(values) {
-        const symbolMap = {
-            'cherry': '🍒',
-            'lemon': '🍋',
-            'orange': '🍊',
-            'watermelon': '🍉'
-        };
-
+    startSpinning() {
         this.slotElements.forEach((slot, index) => {
-            clearInterval(slot.dataset.interval);
-            slot.classList.remove('rolling');
-            slot.textContent = symbolMap[values[index]] || '?';
+            slot.classList.add('spinning');
+            slot.textContent = 'X';
         });
     }
 
-    async progressiveReveal(values) {
-        const symbolMap = {
-            'cherry': '🍒',
-            'lemon': '🍋',
-            'orange': '🍊',
-            'watermelon': '🍉'
-        };
+    stopAllSpinning() {
+        this.slotElements.forEach(slot => {
+            slot.classList.remove('spinning');
+        });
+    }
 
+    async progressiveReveal(slotLetters) {
         // First slot reveals after 1 second
         await this.delay(1000);
-        clearInterval(this.slotElements[0].dataset.interval);
-        this.slotElements[0].classList.remove('rolling');
-        this.slotElements[0].textContent = symbolMap[values[0]] || '?';
+        this.slotElements[0].classList.remove('spinning');
+        this.slotElements[0].textContent = slotLetters[0];
 
         // Second slot reveals after 2 seconds total
         await this.delay(1000);
-        clearInterval(this.slotElements[1].dataset.interval);
-        this.slotElements[1].classList.remove('rolling');
-        this.slotElements[1].textContent = symbolMap[values[1]] || '?';
+        this.slotElements[1].classList.remove('spinning');
+        this.slotElements[1].textContent = slotLetters[1];
 
         // Third slot reveals after 3 seconds total
         await this.delay(1000);
-        clearInterval(this.slotElements[2].dataset.interval);
-        this.slotElements[2].classList.remove('rolling');
-        this.slotElements[2].textContent = symbolMap[values[2]] || '?';
+        this.slotElements[2].classList.remove('spinning');
+        this.slotElements[2].textContent = slotLetters[2];
     }
 
     delay(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 
+    handleCashOutHover() {
+        if (!this.sessionActive) {
+            return;
+        }
+
+        // Remove any existing classes
+        this.cashOutBtn.classList.remove('dodging', 'unclickable');
+
+        const roll = Math.random();
+
+        if (roll < this.cashOutButtonTricks.dodgeChance) {
+            // 50% chance to dodge
+            this.dodgeButton();
+        } else if (roll < this.cashOutButtonTricks.dodgeChance + this.cashOutButtonTricks.unclickableChance) {
+            // 40% chance to become unclickable
+            this.makeUnclickable();
+        }
+        // 10% chance nothing happens
+    }
+
+    dodgeButton() {
+        const container = this.cashOutBtn.parentElement;
+        const containerRect = container.getBoundingClientRect();
+
+        // Random direction within 300px
+        const angle = Math.random() * 2 * Math.PI;
+        const distance = 200 + Math.random() * 100; // 200-300px
+
+        const deltaX = Math.cos(angle) * distance;
+        const deltaY = Math.sin(angle) * distance;
+
+        // Ensure button stays within viewport
+        const newX = Math.max(-150, Math.min(150, deltaX));
+        const newY = Math.max(-150, Math.min(150, deltaY));
+
+        this.cashOutBtn.classList.add('dodging');
+        this.cashOutBtn.style.transform = `translate(${newX}px, ${newY}px)`;
+
+        // Reset position after 2 seconds
+        setTimeout(() => {
+            this.cashOutBtn.classList.remove('dodging');
+            this.cashOutBtn.style.transform = '';
+        }, 2000);
+    }
+
+    makeUnclickable() {
+        this.cashOutBtn.classList.add('unclickable');
+
+        // Reset after 2 seconds
+        setTimeout(() => {
+            this.cashOutBtn.classList.remove('unclickable');
+        }, 2000);
+    }
+
+    handleCashOutClick(event) {
+        if (this.cashOutBtn.classList.contains('unclickable')) {
+            event.preventDefault();
+            this.showMessage('Button is temporarily disabled!', 'error');
+            return;
+        }
+
+        this.cashOut();
+    }
+
     async cashOut() {
         if (!this.sessionActive) {
-            this.showMessage('No active session', 'warning');
+            this.showMessage('No active session', 'error');
             return;
         }
 
@@ -312,7 +339,7 @@ class SlotMachineGame {
             const response = await this.api.cashOut(accountNumber);
 
             if (response.status === 'ok') {
-                this.showMessage(`Successfully cashed out ${response.cashed_out} credits to account ${response.account_number}!`, 'success');
+                this.showMessage(`Successfully cashed out ${response.cashed_out} credits!`, 'success');
                 this.sessionActive = false;
                 this.credits = 0;
                 this.updateUI();
@@ -327,6 +354,7 @@ class SlotMachineGame {
 
     resetSlots() {
         this.slotElements.forEach(slot => {
+            slot.classList.remove('spinning');
             slot.textContent = '?';
         });
     }
@@ -336,32 +364,35 @@ class SlotMachineGame {
             this.creditsDisplay.textContent = this.credits;
         }
 
-        if (this.createSessionBtn) {
-            this.createSessionBtn.style.display = this.sessionActive ? 'none' : 'block';
+        if (this.startBtn) {
+            this.startBtn.style.display = this.sessionActive ? 'none' : 'inline-block';
         }
 
         if (this.rollBtn) {
-            this.rollBtn.style.display = this.sessionActive ? 'block' : 'none';
+            this.rollBtn.style.display = this.sessionActive ? 'inline-block' : 'none';
         }
 
         if (this.cashOutBtn) {
-            this.cashOutBtn.style.display = this.sessionActive ? 'block' : 'none';
+            this.cashOutBtn.style.display = this.sessionActive ? 'inline-block' : 'none';
         }
     }
 
-    showMessage(message, type = 'info') {
+    showMessage(message, type = '') {
         if (this.messageDisplay) {
             this.messageDisplay.textContent = message;
             this.messageDisplay.className = `message ${type}`;
-            setTimeout(() => {
-                this.messageDisplay.textContent = '';
-                this.messageDisplay.className = 'message';
-            }, 3000);
+
+            if (message) {
+                setTimeout(() => {
+                    this.messageDisplay.textContent = '';
+                    this.messageDisplay.className = 'message';
+                }, 3000);
+            }
         }
     }
 }
 
-// Initialize game when DOM is loaded
+// Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    new SlotMachineGame();
+    new MinimalSlotMachine();
 });

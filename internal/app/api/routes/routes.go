@@ -56,4 +56,11 @@ func SetupRoutes(r *chi.Mux) {
 		viewhandlers.GetSlotMachineRoutes(),
 		viewhandlers.SlotMachineHandler{},
 	)
+
+	registerGET[viewhandlers.MinimalSlotInput](
+		context.Background(),
+		r,
+		viewhandlers.GetMinimalSlotRoutes(),
+		viewhandlers.MinimalSlotHandler{},
+	)
 }

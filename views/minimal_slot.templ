@@ -1,0 +1,213 @@
+package views
+
+templ MinimalSlotPage() {
+	@DefaultLayout(minimalSlotContent())
+}
+
+templ minimalSlotContent() {
+	<div class="minimal-container">
+		<h1>Minimal Slot Machine</h1>
+
+		<div class="credits-info">
+			Credits: <span id="minimal-credits">0</span>
+		</div>
+
+		<div class="game-area">
+			<table class="game-table">
+				<tr>
+					<td class="slot-block" id="minimal-slot-1">?</td>
+					<td class="slot-block" id="minimal-slot-2">?</td>
+					<td class="slot-block" id="minimal-slot-3">?</td>
+				</tr>
+			</table>
+			<button id="minimal-start-btn" class="table-side-btn game-btn">Start Game</button>
+			<button id="minimal-roll-btn" class="table-side-btn game-btn" style="display: none;">Roll</button>
+			<button id="minimal-cashout-btn" class="table-side-btn cashout-btn" style="display: none;">CASH OUT</button>
+		</div>
+
+		<div id="minimal-message" class="message"></div>
+
+		<div class="rules">
+			<h3>Rules:</h3>
+			<p>C = Cherry (10), L = Lemon (20), O = Orange (30), W = Watermelon (40)</p>
+			<p>Match all 3 to win! Each roll costs 1 credit.</p>
+		</div>
+	</div>
+
+	<style>
+		.minimal-container {
+			max-width: 600px;
+			margin: 50px auto;
+			padding: 20px;
+			text-align: center;
+			font-family: 'Courier New', monospace;
+			background: #f5f5f5;
+			border: 2px solid #333;
+		}
+
+		.minimal-container h1 {
+			margin: 0 0 20px 0;
+			font-size: 1.8rem;
+			text-transform: uppercase;
+		}
+
+		.credits-info {
+			font-size: 1.2rem;
+			font-weight: bold;
+			margin-bottom: 30px;
+			padding: 10px;
+			background: #fff;
+			border: 1px solid #333;
+			display: inline-block;
+		}
+
+		.game-area {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			gap: 20px;
+			margin: 30px 0;
+		}
+
+		.game-table {
+			border-collapse: separate;
+			border-spacing: 2px;
+			border: 2px solid #333;
+			padding: 10px;
+			background: #fff;
+		}
+
+		.slot-block {
+			width: 80px;
+			height: 80px;
+			border: 2px solid #333;
+			background: #fff;
+			text-align: center;
+			vertical-align: middle;
+			font-size: 2rem;
+			font-weight: bold;
+			font-family: 'Courier New', monospace;
+		}
+
+		.table-side-btn {
+			margin-left: 10px;
+		}
+
+		.slot-block.spinning {
+			animation: spin 0.1s infinite;
+			background: #ffeb3b;
+		}
+
+		@keyframes spin {
+			0%, 100% { content: 'X'; }
+		}
+
+		.slot-block.spinning::after {
+			content: 'X';
+			animation: rotate 0.1s infinite;
+		}
+
+		@keyframes rotate {
+			from { transform: rotate(0deg); }
+			to { transform: rotate(360deg); }
+		}
+
+
+		.game-btn {
+			padding: 12px 24px;
+			margin: 0 10px;
+			border: 2px solid #333;
+			background: #fff;
+			font-family: 'Courier New', monospace;
+			font-size: 1rem;
+			font-weight: bold;
+			cursor: pointer;
+			text-transform: uppercase;
+		}
+
+		.game-btn:hover {
+			background: #333;
+			color: #fff;
+		}
+
+		.game-btn:disabled {
+			opacity: 0.5;
+			cursor: not-allowed;
+			background: #ccc;
+		}
+
+		.cashout-btn {
+			padding: 12px 12px;
+			margin: 0 10px;
+			border: 2px solid #ff0000;
+			background: #ff0000;
+			color: #fff;
+			font-family: 'Courier New', monospace;
+			font-size: 12px;
+			font-weight: bold;
+			cursor: pointer;
+			text-transform: uppercase;
+			transition: all 0.3s ease;
+			position: relative;
+		}
+
+		.cashout-btn:hover {
+			background: #cc0000;
+		}
+
+		.cashout-btn.dodging {
+			transition: all 0.5s ease;
+		}
+
+		.cashout-btn.unclickable {
+			pointer-events: none;
+			opacity: 0.5;
+			cursor: not-allowed;
+		}
+
+		.message {
+			margin: 20px 0;
+			padding: 10px;
+			border: 1px solid #333;
+			background: #fff;
+			min-height: 20px;
+			font-family: 'Courier New', monospace;
+		}
+
+		.message.success {
+			background: #d4edda;
+			border-color: #c3e6cb;
+		}
+
+		.message.error {
+			background: #f8d7da;
+			border-color: #f5c6cb;
+		}
+
+		.message.win {
+			background: #ffeb3b;
+			border-color: #333;
+			font-weight: bold;
+		}
+
+		.rules {
+			margin-top: 30px;
+			text-align: left;
+			background: #fff;
+			padding: 15px;
+			border: 1px solid #333;
+		}
+
+		.rules h3 {
+			margin: 0 0 10px 0;
+			text-align: center;
+		}
+
+		.rules p {
+			margin: 5px 0;
+			font-size: 0.9rem;
+		}
+	</style>
+
+	<script src="/static/js/minimal-slot.js"></script>
+}
