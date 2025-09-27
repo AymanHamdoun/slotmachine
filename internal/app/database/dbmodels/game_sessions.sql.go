@@ -10,6 +10,21 @@ import (
 	"database/sql"
 )
 
+const addCreditsToSession = `-- name: AddCreditsToSession :execresult
+UPDATE game_sessions
+SET credits = credits + ?
+WHERE token = ? AND deleted_at IS NULL
+`
+
+type AddCreditsToSessionParams struct {
+	Credits int32
+	Token   string
+}
+
+func (q *Queries) AddCreditsToSession(ctx context.Context, arg AddCreditsToSessionParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, addCreditsToSession, arg.Credits, arg.Token)
+}
+
 const createGameSession = `-- name: CreateGameSession :execresult
 INSERT INTO game_sessions (
     name, token, credits
@@ -54,4 +69,20 @@ func (q *Queries) GetGameSessionByToken(ctx context.Context, token string) (Game
 		&i.DeletedAt,
 	)
 	return i, err
+}
+
+const subtractCreditsFromSession = `-- name: SubtractCreditsFromSession :execresult
+UPDATE game_sessions
+SET credits = credits - ?
+WHERE token = ? AND deleted_at IS NULL AND credits >= ?
+`
+
+type SubtractCreditsFromSessionParams struct {
+	Credits   int32
+	Token     string
+	Credits_2 int32
+}
+
+func (q *Queries) SubtractCreditsFromSession(ctx context.Context, arg SubtractCreditsFromSessionParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, subtractCreditsFromSession, arg.Credits, arg.Token, arg.Credits_2)
 }

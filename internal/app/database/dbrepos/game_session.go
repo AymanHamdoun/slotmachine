@@ -112,3 +112,52 @@ func (r GameSessionRepo) DeleteByToken(ctx context.Context, token string) (bool,
 
 	return rowsAffected > 0, nil
 }
+
+func (r GameSessionRepo) AddCredits(ctx context.Context, token string, credits int32) (bool, error) {
+	db, err := database.GetDB(ctx)
+	if err != nil {
+		return false, err
+	}
+
+	queries := dbmodels.New(db)
+
+	result, err := queries.AddCreditsToSession(ctx, dbmodels.AddCreditsToSessionParams{
+		Credits: credits,
+		Token:   token,
+	})
+	if err != nil {
+		return false, err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return false, err
+	}
+
+	return rowsAffected > 0, nil
+}
+
+func (r GameSessionRepo) SubtractCredits(ctx context.Context, token string, credits int32) (bool, error) {
+	db, err := database.GetDB(ctx)
+	if err != nil {
+		return false, err
+	}
+
+	queries := dbmodels.New(db)
+
+	result, err := queries.SubtractCreditsFromSession(ctx, dbmodels.SubtractCreditsFromSessionParams{
+		Credits:   credits,
+		Token:     token,
+		Credits_2: credits, // This ensures we don't go below 0
+	})
+	if err != nil {
+		return false, err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return false, err
+	}
+
+	return rowsAffected > 0, nil
+}

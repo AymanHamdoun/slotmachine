@@ -11,3 +11,13 @@ WHERE token = ? AND deleted_at IS NULL LIMIT 1;
 UPDATE game_sessions
 SET deleted_at = NOW()
 WHERE token = ? AND deleted_at IS NULL;
+
+-- name: AddCreditsToSession :execresult
+UPDATE game_sessions
+SET credits = credits + ?
+WHERE token = ? AND deleted_at IS NULL;
+
+-- name: SubtractCreditsFromSession :execresult
+UPDATE game_sessions
+SET credits = credits - ?
+WHERE token = ? AND deleted_at IS NULL AND credits >= ?;

@@ -24,6 +24,13 @@ func SetupRoutes(r *chi.Mux) {
 		apihandlers.CreateSessionHandler{},
 	)
 
+	registerPOST[apihandlers.RollInput](
+		context.Background(),
+		r,
+		apihandlers.GetRollRoutes(),
+		apihandlers.RollHandler{},
+	)
+
 	registerGET[apihandlers.GetSessionInput](
 		context.Background(),
 		r,

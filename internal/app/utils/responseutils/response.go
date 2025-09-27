@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"time"
 )
 
 type ErrorResponse struct {
@@ -25,8 +26,9 @@ func SetCookie(w http.ResponseWriter, httpOnly bool, key string, value string) {
 		Name:     key,
 		Value:    value,
 		Path:     "/",
-		HttpOnly: httpOnly,             // not accessible to JS.
-		Secure:   true,                 // only over HTTPS.
-		SameSite: http.SameSiteLaxMode, // prevents browser from sending cooking to other sites.
+		HttpOnly: httpOnly,                      // not accessible to JS.
+		Secure:   true,                          // only over HTTPS.
+		SameSite: http.SameSiteLaxMode,          // prevents browser from sending cooking to other sites.
+		Expires:  time.Now().Add(1 * time.Hour), // can be a param
 	})
 }
