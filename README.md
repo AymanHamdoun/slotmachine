@@ -1,4 +1,156 @@
-# Go Slot Machine Backend
+[Slot Machine API.postman_collection.json](https://github.com/user-attachments/files/22573378/Slot.Machine.API.postman_collection.json)# Go Slot Machine Backend
+<img width="714" height="684" alt="Screenshot 2025-09-27 at 2 55 06 PM" src="https://github.com/user-attachments/assets/2ae9e62d-3575-4431-b09a-7b706de4ac3e" />
+
+[Uploading Slot Machine A{
+	"info": {
+		"_postman_id": "b283aaa1-ecdd-4342-8f38-5cc269331ed7",
+		"name": "Slot Machine API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "21479280"
+	},
+	"item": [
+		{
+			"name": "Create Game Session",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Ayman\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/api/v1/sessions",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"sessions"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Current Session",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Ayman\"\n}"
+				},
+				"url": {
+					"raw": "{{host}}/api/v1/session",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"session"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Roll",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Ayman\"\n}"
+				},
+				"url": {
+					"raw": "{{host}}/api/v1/roll",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"roll"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Cash Out",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"account_number\": \"123\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/api/v1/cash-out",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"cash-out"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "host",
+			"value": ""
+		},
+		{
+			"key": "token",
+			"value": ""
+		}
+	]
+}PI.postman_collection.json…]()
+
 
 A full-stack slot machine game built with Go backend and vanilla JavaScript frontend. Features session management, progressive slot reveals, credit tracking, and server-side cheating mechanics based on player credit levels.
 
