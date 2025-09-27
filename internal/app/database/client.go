@@ -9,7 +9,13 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
+var dbConnection *sql.DB
+
 func GetDB(ctx context.Context) (*sql.DB, error) {
+	if dbConnection != nil {
+		return dbConnection, nil
+	}
+
 	dbString := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s",
 		config.Get().DatabaseUser,
 		config.Get().DatabasePass,
@@ -18,5 +24,11 @@ func GetDB(ctx context.Context) (*sql.DB, error) {
 		config.Get().DatabaseName,
 	)
 
-	return sql.Open("mysql", dbString)
+	var err error
+	dbConnection, err = sql.Open("mysql", dbString)
+	if err != nil {
+		return nil, err
+	}
+
+	return dbConnection, nil
 }

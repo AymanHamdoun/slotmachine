@@ -3,7 +3,6 @@ package routes
 import (
 	"context"
 	"go-backend/internal/app/api/apihandlers"
-	"go-backend/internal/app/api/viewhandlers"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -18,17 +17,10 @@ func SetupRoutes(r *chi.Mux) {
 	publicFS := http.FileServer(http.Dir("web/public"))
 	r.Handle("/public/*", http.StripPrefix("/public/", publicFS))
 
-	registerPOST[apihandlers.CreateUserInput](
+	registerPOST[apihandlers.CreateSessionInput](
 		context.Background(),
 		r,
-		apihandlers.GetCreateUserRoutes(),
-		apihandlers.CreateUserHandler{},
-	)
-
-	registerGET[viewhandlers.CreateUserInput](
-		context.Background(),
-		r,
-		viewhandlers.GetCreateUserRoutes(),
-		viewhandlers.CreateUserHandler{},
+		apihandlers.GetCreateSessionRoutes(),
+		apihandlers.CreateSessionHandler{},
 	)
 }

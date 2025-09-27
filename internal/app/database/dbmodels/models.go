@@ -8,23 +8,12 @@ import (
 	"database/sql"
 )
 
-type User struct {
-	ID                   int64
-	FirstName            string
-	LastName             string
-	Avatar               sql.NullString
-	Email                sql.NullString
-	Password             sql.NullString
-	MobileNumber         sql.NullString
-	RegistrationMethodID int32
-	Status               sql.NullBool
-	CreatedAt            sql.NullTime
-	UpdatedAt            sql.NullTime
-	DeletedAt            sql.NullTime
-}
-
-type UserRegistrationMethod struct {
-	ID          int64
-	Name        string
-	Description sql.NullString
+type GameSession struct {
+	ID        int64
+	Name      sql.NullString
+	Token     string
+	Credits   int32
+	CreatedAt sql.NullTime
+	UpdatedAt sql.NullTime
+	DeletedAt sql.NullTime
 }
