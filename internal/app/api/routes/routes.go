@@ -23,4 +23,11 @@ func SetupRoutes(r *chi.Mux) {
 		apihandlers.GetCreateSessionRoutes(),
 		apihandlers.CreateSessionHandler{},
 	)
+
+	registerGET[apihandlers.GetSessionInput](
+		context.Background(),
+		r,
+		apihandlers.GetGetSessionRoutes(),
+		apihandlers.GetSessionHandler{},
+	)
 }

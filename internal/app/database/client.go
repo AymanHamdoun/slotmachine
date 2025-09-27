@@ -16,7 +16,7 @@ func GetDB(ctx context.Context) (*sql.DB, error) {
 		return dbConnection, nil
 	}
 
-	dbString := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s",
+	dbString := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true",
 		config.Get().DatabaseUser,
 		config.Get().DatabasePass,
 		config.Get().DatabaseHost,

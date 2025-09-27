@@ -3,6 +3,7 @@ package apihandlers
 import (
 	"context"
 	"go-backend/internal/app/database/dbrepos"
+	"go-backend/internal/app/utils/responseutils"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -43,13 +44,16 @@ func (h CreateSessionHandler) Serve(ctx context.Context, input CreateSessionInpu
 	})
 
 	if err != nil {
-		_json(ctx, w, errorResponse{
+		responseutils.WriteJSON(ctx, w, responseutils.ErrorResponse{
 			Status:  "error",
 			Message: err.Error(),
 		})
+		return
 	}
 
-	_json(ctx, w, CreateSessionResponse{
+	responseutils.SetCookie(w, true, "token", sessionToken)
+
+	responseutils.WriteJSON(ctx, w, CreateSessionResponse{
 		Status: "ok",
 		Session: GameSessionResource{
 			Name:    session.Name,

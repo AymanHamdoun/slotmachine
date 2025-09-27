@@ -1,13 +1,13 @@
--- name: GetGameSession :one
-SELECT * FROM game_sessions
-WHERE id = ? AND deleted_at IS NULL LIMIT 1;
-
 -- name: CreateGameSession :execresult
 INSERT INTO game_sessions (
     name, token, credits
 ) VALUES (?, ?, ?);
 
--- name: DeleteGameSession :exec
+-- name: GetGameSessionByToken :one
+SELECT * FROM game_sessions
+WHERE token = ? AND deleted_at IS NULL LIMIT 1;
+
+-- name: DeleteGameSessionByToken :execresult
 UPDATE game_sessions
 SET deleted_at = NOW()
-WHERE id = ?;
+WHERE token = ? AND deleted_at IS NULL;

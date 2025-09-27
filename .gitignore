@@ -5,3 +5,6 @@
 
 /local-env/mysql_data
 /web/node_modules
+
+.claude
+CLAUDE.md

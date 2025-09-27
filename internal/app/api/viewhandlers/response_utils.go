@@ -1,10 +1,12 @@
 package viewhandlers
 
+// these funcs should be moved to responseutils/response.go
 import (
 	"context"
 	"fmt"
-	"github.com/a-h/templ"
 	"net/http"
+
+	"github.com/a-h/templ"
 )
 
 func _view(ctx context.Context, w http.ResponseWriter, r *http.Request, viewPath string, viewData any) {

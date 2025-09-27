@@ -26,24 +26,23 @@ func (q *Queries) CreateGameSession(ctx context.Context, arg CreateGameSessionPa
 	return q.db.ExecContext(ctx, createGameSession, arg.Name, arg.Token, arg.Credits)
 }
 
-const deleteGameSession = `-- name: DeleteGameSession :exec
+const deleteGameSessionByToken = `-- name: DeleteGameSessionByToken :execresult
 UPDATE game_sessions
 SET deleted_at = NOW()
-WHERE id = ?
+WHERE token = ? AND deleted_at IS NULL
 `
 
-func (q *Queries) DeleteGameSession(ctx context.Context, id int64) error {
-	_, err := q.db.ExecContext(ctx, deleteGameSession, id)
-	return err
+func (q *Queries) DeleteGameSessionByToken(ctx context.Context, token string) (sql.Result, error) {
+	return q.db.ExecContext(ctx, deleteGameSessionByToken, token)
 }
 
-const getGameSession = `-- name: GetGameSession :one
+const getGameSessionByToken = `-- name: GetGameSessionByToken :one
 SELECT id, name, token, credits, created_at, updated_at, deleted_at FROM game_sessions
-WHERE id = ? AND deleted_at IS NULL LIMIT 1
+WHERE token = ? AND deleted_at IS NULL LIMIT 1
 `
 
-func (q *Queries) GetGameSession(ctx context.Context, id int64) (GameSession, error) {
-	row := q.db.QueryRowContext(ctx, getGameSession, id)
+func (q *Queries) GetGameSessionByToken(ctx context.Context, token string) (GameSession, error) {
+	row := q.db.QueryRowContext(ctx, getGameSessionByToken, token)
 	var i GameSession
 	err := row.Scan(
 		&i.ID,
